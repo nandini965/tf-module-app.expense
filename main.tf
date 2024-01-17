@@ -1,10 +1,5 @@
-resource "aws_db_subnet_group" "main" {
-  name       = "${name}-${var.env}-sg"
-  subnet_ids = var.subnets
-  tags = merge(var.tags, {Name: "${env}-${component}" })
-}
 
-resource "aws_security_group" "main" {
+resource "aws_security_group" "sg" {
   name        = "${var.name}-${var.env}-sg"
   description = "${var.name}-${var.env}-sg"
   vpc_id      = var.vpc_id
@@ -33,12 +28,13 @@ resource "aws_security_group" "main" {
   tags = merge(var.tags, { Name : "${env}-${component}-sg" })
 }
 
-  resource "aws_launch_template" "main" {
-    name_prefix   = "${name}-${var.env}"
+  resource "aws_launch_template" "template" {
+    name_prefix   = "${var.name}-${var.env}-lt"
     image_id      = data.aws_ami.ami.id
     instance_type = var.instance_type
-    tags = merge(var.tags, { Name : "${env}-${component}-lt" })
+    vpc_security_group_ids = [aws_security_group.sg.id]
   }
+
 resource "aws_lb_target_group" "main" {
   name        = "${var.env}-${var.name}"
   target_type = "alb"
@@ -50,16 +46,31 @@ resource "aws_lb_target_group" "main" {
   tags =merge(var.tags, { Name : "${env}-${component}-tg" })
 }
 
-  resource "aws_autoscaling_group" "main" {
-    availability_zones = var.azs
-    desired_capacity   = var.desired_capacity
-    max_size           = var.max_size
-    min_size           = var.min_size
-    vpc_zone_identifier = var.subnets
+resource "aws_autoscaling_group" "asg" {
+  name                = "${var.name}-${var.env}-asg"
+  desired_capacity    = var.desired_capacity
+  max_size            = var.max_size
+  min_size            = var.min_size
+  vpc_zone_identifier = var.subnet_ids
+  target_group_arns = [aws_lb_target_group.main.arn]
 
 
-    tags = merge(var.tags, { Name : "${env}-${component}" })
+  launch_template {
+    id      = aws_launch_template.template.id
+    version = "$Latest"
+  }
+
+
+  dynamic "tag" {
+    for_each = local.asg_tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
 }
+
 
 
 resource "aws_lb_target_group" "main" {
