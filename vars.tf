@@ -1,0 +1,14 @@
+variable "tags" {}
+variable "name" {}
+variable "env" {}
+variable "app_cidr" {}
+variable "subnets" {}
+variable "vpc_id" {}
+variable "app_port" {}
+variable "allow_app_cidr" {}
+variable "bastion_cidr" {}
+variable "instance_type" {}
+variable "azs" {}
+variable "desired_capacity" {}
+variable "max_size" {}
+variable "min_size" {}
