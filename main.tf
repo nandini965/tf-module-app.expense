@@ -8,7 +8,7 @@ resource "aws_security_group" "sg" {
     description = "APP"
     from_port   = var.app_port
     to_port     = var.app_port
-    protocol    = "tcp"
+    protocol    = "HTTP"
     cidr_blocks = var.allow_app_cidr
   }
   ingress {
