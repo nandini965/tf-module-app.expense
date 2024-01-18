@@ -6,7 +6,6 @@ variable "app_port" {}
 variable "allow_app_cidr" {}
 variable "bastion_cidr" {}
 variable "instance_type" {}
-variable "azs" {}
 variable "desired_capacity" {}
 variable "max_size" {}
 variable "min_size" {}
