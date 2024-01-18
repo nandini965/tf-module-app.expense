@@ -33,6 +33,9 @@ resource "aws_security_group" "sg" {
     image_id      = data.aws_ami.ami.id
     instance_type = var.instance_type
     vpc_security_group_ids = [aws_security_group.sg.id]
+    iam_instance_profile {
+      name = aws_iam_instance_profile.instance_profile.name
+    }
   }
 
 resource "aws_lb_target_group" "main" {
@@ -53,7 +56,6 @@ resource "aws_autoscaling_group" "asg" {
   min_size            = var.min_size
   vpc_zone_identifier = var.subnet_ids
   target_group_arns   = [aws_lb_target_group.main.arn]
-
 
   launch_template {
     id      = aws_launch_template.template.id
